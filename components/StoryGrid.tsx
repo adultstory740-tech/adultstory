@@ -108,21 +108,21 @@ export default function StoryGrid() {
                         className="group bg-white/80 backdrop-blur rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 p-5 flex flex-col justify-between border border-gray-200"
                     >
                         <div>
-                            <h2 className="text-base sm:text-lg font-semibold mb-1 group-hover:text-blue-600 transition line-clamp-2">
+                            <h2 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-primary transition line-clamp-2 text-foreground">
                                 {story.title}
                             </h2>
 
-                            <p className="text-xs text-gray-400 mb-3">
+                            <p className="text-sm text-foreground/60 mb-3 font-medium">
                                 {story.date}
                             </p>
 
-                            <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                            <p className="text-base text-foreground/80 leading-relaxed line-clamp-3">
                                 {story.excerpt}
                             </p>
                         </div>
 
-                        <div className="mt-4">
-                            <span className="inline-block text-[10px] font-medium bg-blue-50 text-blue-600 px-2 py-1 rounded-full">
+                        <div className="mt-5">
+                            <span className="inline-block text-xs font-semibold bg-accent/20 text-accent-foreground px-2.5 py-1 rounded-md">
                                 {story.category}
                             </span>
 
@@ -130,7 +130,7 @@ export default function StoryGrid() {
                                 {story.tags.map((tag, index) => (
                                     <span
                                         key={index}
-                                        className="text-[10px] bg-gray-100 px-2 py-1 rounded-full text-gray-500"
+                                        className="text-xs bg-secondary px-2.5 py-1 rounded-md text-secondary-foreground font-medium"
                                     >
                                         #{tag}
                                     </span>
@@ -138,7 +138,7 @@ export default function StoryGrid() {
                             </div>
                         </div>
 
-                        <button className="mt-5 w-full text-sm font-medium bg-gradient-to-r from-black to-gray-800 text-white py-2 rounded-xl hover:scale-[1.03] active:scale-95 transition">
+                        <button className="mt-6 w-full text-base font-semibold bg-primary text-primary-foreground py-2.5 rounded-xl hover:scale-[1.02] active:scale-95 transition shadow-sm hover:shadow">
                             पढ़ें →
                         </button>
                     </div>

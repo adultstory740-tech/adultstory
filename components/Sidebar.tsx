@@ -25,10 +25,10 @@ export default function Sidebar() {
                 <div className="space-y-4">
                     {RECENT_STORIES.map((story) => (
                         <div key={story.id} className="group cursor-pointer">
-                            <h4 className="text-sm font-semibold group-hover:text-primary transition-colors line-clamp-2">
+                            <h4 className="text-base font-semibold group-hover:text-primary transition-colors line-clamp-2 text-foreground">
                                 {story.title}
                             </h4>
-                            <p className="text-xs text-foreground/60 mt-1">{story.time}</p>
+                            <p className="text-sm text-foreground/60 mt-1 font-medium">{story.time}</p>
                         </div>
                     ))}
                 </div>
@@ -42,10 +42,10 @@ export default function Sidebar() {
                 <div className="space-y-4">
                     {MORE_LIKE_THIS.map((story) => (
                         <div key={story.id} className="group cursor-pointer">
-                            <h4 className="text-sm font-semibold group-hover:text-primary transition-colors line-clamp-2">
+                            <h4 className="text-base font-semibold group-hover:text-primary transition-colors line-clamp-2 text-foreground">
                                 {story.title}
                             </h4>
-                            <p className="text-xs text-foreground/60 mt-1">{story.views}</p>
+                            <p className="text-sm text-foreground/60 mt-1 font-medium">{story.views}</p>
                         </div>
                     ))}
                 </div>
