@@ -1,17 +1,6 @@
 import Link from "next/link";
 import React from "react";
-
-const CATEGORIES = [
-    { name: "ताज़ा कहानियां", href: "/" },
-    { name: "देवर भाभी", href: "/category/devar-bhabhi" },
-    { name: "जीजा साली", href: "/category/jija-sali" },
-    { name: "पड़ोसी", href: "/category/padosi" },
-    { name: "दोस्त", href: "/category/dost" },
-    { name: "ऑफिस", href: "/category/office" },
-    { name: "हॉट रोमांस", href: "/category/hot-romance" },
-    { name: "सुहागरात", href: "/category/suhagrat" },
-    { name: "ऑडियो स्टोरी", href: "/category/audio-story" },
-];
+import { CATEGORIES } from "../lib/mockData";
 
 export default function Navbar() {
     return (
@@ -28,7 +17,7 @@ export default function Navbar() {
                 <div className="hidden lg:flex items-center gap-6 ml-10 overflow-x-auto">
                     {CATEGORIES.map((cat) => (
                         <Link
-                            key={cat.name}
+                            key={cat.slug}
                             href={cat.href}
                             className="text-sm font-medium hover:text-primary transition-colors whitespace-nowrap"
                         >
@@ -43,7 +32,7 @@ export default function Navbar() {
                 <div className="flex overflow-x-auto hide-scrollbar py-2.5 px-4 gap-4 items-center">
                     {CATEGORIES.map((cat) => (
                         <Link
-                            key={cat.name}
+                            key={cat.slug}
                             href={cat.href}
                             className="text-sm font-medium hover:text-primary transition-colors whitespace-nowrap px-3 py-1.5 rounded-full bg-secondary/50 text-secondary-foreground hover:bg-secondary"
                         >

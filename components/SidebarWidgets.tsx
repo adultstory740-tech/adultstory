@@ -39,7 +39,7 @@ export function SidebarStoryList({ title, stories }: SidebarStoryListProps) {
 
 interface SidebarCategoriesProps {
     title: string;
-    categories: string[];
+    categories: { name: string; slug: string; href?: string }[];
 }
 
 export function SidebarCategories({ title, categories }: SidebarCategoriesProps) {
@@ -50,14 +50,14 @@ export function SidebarCategories({ title, categories }: SidebarCategoriesProps)
             <h3 className="text-xl font-bold mb-4 text-primary border-b border-border pb-2">
                 {title}
             </h3>
-            <div className="grid grid-cols-2 gap-2">
-                {categories.map((tag) => (
-                    <Link 
-                        key={tag} 
-                        href={`/category/${tag}`}
+            <div className="grid grid-cols-1 gap-1">
+                {categories.map((cat) => (
+                    <Link
+                        key={cat.slug}
+                        href={`/category/${cat.slug}`}
                         className="text-xs sm:text-sm font-medium bg-secondary/50 border border-border/50 text-secondary-foreground hover:bg-primary hover:border-primary hover:text-primary-foreground transition-colors px-2 py-2.5 rounded-lg text-center shadow-sm"
                     >
-                        {tag}
+                        {cat.name}
                     </Link>
                 ))}
             </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 export interface Story {
     id: number;
@@ -17,9 +18,11 @@ export default function StoryCard({ story }: StoryCardProps) {
     return (
         <div className="group bg-card backdrop-blur rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-5 flex flex-col justify-between border border-border">
             <div>
-                <h2 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-primary transition line-clamp-2 text-foreground">
-                    {story.title}
-                </h2>
+                <Link href={`/story/${story.id}`}>
+                    <h2 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-primary transition line-clamp-2 text-foreground">
+                        {story.title}
+                    </h2>
+                </Link>
 
                 <p className="text-sm text-foreground/60 mb-3 font-medium">
                     {story.date}
@@ -47,9 +50,9 @@ export default function StoryCard({ story }: StoryCardProps) {
                 </div>
             </div>
 
-            <button className="mt-6 w-full text-base font-semibold bg-primary text-primary-foreground py-2.5 rounded-xl hover:scale-[1.02] active:scale-95 transition shadow-sm hover:shadow">
+            <Link href={`/story/${story.id}`} className="mt-6 block w-full text-center text-base font-semibold bg-primary text-primary-foreground py-2.5 rounded-xl hover:scale-[1.02] active:scale-95 transition shadow-sm hover:shadow">
                 पढ़ें →
-            </button>
+            </Link>
         </div>
     );
 }
