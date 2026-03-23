@@ -1,59 +1,48 @@
-import { apiClient, ApiError } from "./client";
+import connectToDatabase from "../mongodb";
+import Category from "../../models/Category";
+import { apiClient } from "./client";
 
-/**
- * Category Data Interface
- */
-export interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  uiLabel?: string;
-  priority: number;
-  showInNavbar: boolean;
-  isActive: boolean;
+export interface CategoryData {
+    _id: string;
+    name: string;
+    slug: string;
+    uiLabel?: string;
+    priority?: number;
+    showInNavbar?: boolean;
 }
 
-/**
- * Service to handle all Category related API calls
- * It uses the generic apiClient for better error handling and optimization
- */
-export const CategoryService = {
-  /**
-   * Fetch all active categories
-   * Optimized with Next.js caching
-   */
-  async getAll(): Promise<Category[]> {
+export async function getCategories(): Promise<CategoryData[]> {
     try {
-      const categories = await apiClient.get<Category[]>("/api/categories", {
-        next: {
-          revalidate: 3600, // Background revalidation every hour
-          tags: ["categories-list"],
-        },
-      });
-      return categories;
+        await connectToDatabase();
+        
+        // Fetch active categories that should be in the navbar
+        const categories = await Category.find({ 
+            isActive: true,
+            showInNavbar: true 
+        })
+        .select('_id name slug uiLabel priority showInNavbar')
+        .sort({ priority: 1, name: 1 })
+        .lean();
+
+        // Convert MongoDB ObjectIds to strings so they can be serialized and passed to Client Components if needed
+        return categories.map((cat: any) => ({
+            _id: cat._id.toString(),
+            name: cat.name,
+            slug: cat.slug,
+            uiLabel: cat.uiLabel,
+            priority: cat.priority,
+            showInNavbar: cat.showInNavbar
+        }));
     } catch (error) {
-      if (error instanceof ApiError) {
-        console.error(`Category Fetch Error: [${error.status}]`, error.message);
-      } else {
-        console.error("Unknown Error fetching categories", error);
-      }
-      return []; // graceful fallback
+        console.error("Failed to fetch categories natively:", error);
+        return [];
     }
-  },
+}
 
-  /**
-   * Example: Create a new category 
-   * (We just built the POST API for this)
-   */
-  async create(data: Partial<Category>): Promise<Category> {
-    const response = await apiClient.post<{ message: string; categories: Category[] }>(
-      "/api/categories",
-      data
-    );
-    return response.categories[0];
-  },
+export const CategoryService = {
+    getAll: getCategories,
+    // Add other methods like create, update here if needed in frontend
+    create: async (data: Partial<CategoryData>) => {
+        return await apiClient.post<CategoryData>("/api/categories", data);
+    }
 };
-
-// Also export the existing getCategories function structure for backward compatibility 
-// with what we just built, simply mapping it to the new service.
-export const getCategories = CategoryService.getAll;
