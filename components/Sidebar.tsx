@@ -1,23 +1,44 @@
 import React from "react";
 import { SidebarStoryList, SidebarCategories } from "./SidebarWidgets";
-import { CATEGORIES, getLatestStories, stories } from "../lib/mockData";
+import { getCategories } from "../lib/api/categories";
+import { StoryService } from "../lib/api/stories";
 
-export default function Sidebar() {
-    const recent = getLatestStories(4).map(s => ({
-        id: s.id.toString(),
+export default async function Sidebar() {
+    // Fetch categories dynamically using our reusable generic service with Next.js Cache
+    const categories = await getCategories();
+
+    // Fetch recent stories from the database to replace getLatestStories
+    const recentData = await StoryService.getStories(undefined, 1, 4);
+    const recent = recentData.stories.map(s => ({
+        id: s._id.toString(),
         title: s.title,
-        subtitle: s.date,
-        url: `/story/${s.id}`
+        subtitle: new Date(s.createdAt).toLocaleDateString("hi-IN"),
+        url: `/story/${s.slug || s._id}`
     }));
 
-    const moreLikeThis = stories.slice(10, 13).map(s => ({
-        id: s.id.toString(),
-        title: s.title,
-        subtitle: "🔥 ट्रेंडिंग",
-        url: `/story/${s.id}`
-    }));
+    // Fetch trending stories from the database (just simulating by taking a different page for now)
+    const trendingData = await StoryService.getStories(undefined, 2, 3);
+    const moreLikeThis = trendingData.stories.length > 0
+        ? trendingData.stories.map(s => ({
+            id: s._id.toString(),
+            title: s.title,
+            subtitle: "🔥 ट्रेंडिंग",
+            url: `/story/${s.slug || s._id}`
+          }))
+        : recentData.stories.slice(0, 3).map(s => ({
+            id: s._id.toString(),
+            title: s.title,
+            subtitle: "🔥 ट्रेंडिंग",
+            url: `/story/${s.slug || s._id}`
+          }));
 
-    const popularCategories = CATEGORIES.filter(c => c.slug !== "latest");
+    const popularCategories = [
+        { name: "सभी कहानियाँ", slug: "home", href: "/" },
+        ...categories.map(cat => ({
+            name: cat.uiLabel || cat.name,
+            slug: cat.slug,
+        }))
+    ];
 
     return (
         <aside className="w-full flex flex-col gap-8">

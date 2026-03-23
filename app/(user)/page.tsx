@@ -1,9 +1,11 @@
 import StoryGrid from "../../components/StoryGrid";
 import Sidebar from "../../components/Sidebar";
-import { getLatestStories } from "../../lib/mockData";
+import { StoryService } from "../../lib/api/stories";
 
-export default function Home() {
-  const latestStories = getLatestStories(20);
+export default async function Home() {
+  // Fetch up to 20 latest stories globally (no category filter)
+  const paginatedData = await StoryService.getStories(undefined, 1, 20);
+  const latestStories = paginatedData.stories;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 w-full">

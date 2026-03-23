@@ -1,16 +1,20 @@
 import StoryGrid from "../../../../components/StoryGrid";
 import Sidebar from "../../../../components/Sidebar";
-import { stories, CATEGORIES } from "../../../../lib/mockData";
+import { getCategories } from "../../../../lib/api/categories";
+import { StoryService } from "../../../../lib/api/stories";
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     
-    // Find the matching category object
-    const categoryInfo = CATEGORIES.find(c => c.slug === slug);
-    const categoryName = categoryInfo ? categoryInfo.name : decodeURIComponent(slug);
+    const categories = await getCategories();
     
-    // Exact filtering based on the slug mapped in tags
-    const categoryStories = stories.filter(story => story.tags.includes(slug));
+    // Find the matching category object
+    const categoryInfo = categories.find(c => c.slug === slug);
+    const categoryName = categoryInfo ? (categoryInfo.uiLabel || categoryInfo.name) : decodeURIComponent(slug);
+    
+    // Fetch stories from our optimized dynamic API
+    const paginatedData = await StoryService.getStories(slug, 1, 20);
+    const categoryStories = paginatedData.stories;
 
     const pageTitle = `श्रेणी: ${categoryName}`;
 
@@ -18,13 +22,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         <div className="max-w-7xl mx-auto px-4 py-8 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8">
-                    {categoryStories.length > 0 ? (
-                        <StoryGrid title={pageTitle} stories={categoryStories} />
-                    ) : (
-                        <div className="bg-card border border-border rounded-xl p-8 text-center text-foreground/60 font-medium">
-                            इस श्रेणी में अभी कोई कहानी नहीं है।
-                        </div>
-                    )}
+                    <StoryGrid title={pageTitle} stories={categoryStories} />
                 </div>
 
                 <div className="lg:col-span-4">

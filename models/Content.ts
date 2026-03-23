@@ -132,16 +132,20 @@ const ContentSchema = new Schema(
 /**
  * AUTO SLUG GENERATION
  */
-ContentSchema.pre("save", function (this: any, next: any) {
+ContentSchema.pre("save", async function (this: any) {
   if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
-      .replace(/[^a-z0-9\u0900-\u097F]+/g, "-") // Added Hindi Unicode range (\u0900-\u097F) so Hindi titles don't become blank slugs
+      .replace(/[^a-z0-9\u0900-\u097F]+/g, "-")
       .replace(/(^-|-$)/g, "");
   }
-  next();
 });
 
-const Content = models.Content || model("Content", ContentSchema);
+// Clear the Mongoose cache for this model during HMR to ensure new hooks are applied
+if (models.Content) {
+  delete models.Content;
+}
+
+const Content = model("Content", ContentSchema);
 
 export default Content;
