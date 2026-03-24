@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+
+
 import { notFound } from "next/navigation";
 import Sidebar from "../../../../components/Sidebar";
 import { StoryService } from "../../../../lib/api/stories";
@@ -6,7 +9,7 @@ import { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
-    
+
     // Fetch story dynamically using the cache
     const story = await StoryService.getStoryBySlug(id);
 
@@ -44,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function StoryPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params; // id here is actually the slug
-    
+
     // Fetch story dynamically
     const story = await StoryService.getStoryBySlug(id);
 
@@ -83,7 +86,7 @@ export default async function StoryPage({ params }: { params: Promise<{ id: stri
                                 <span>👁 {story.views || 0} Views</span>
                             </div>
                         </div>
-                        
+
                         <div className="text-lg text-foreground/90 leading-relaxed space-y-6 mt-8">
                             {/* First paragraph logic for excerpt/highlight */}
                             {story.contentBlocks && story.contentBlocks.length > 0 ? (
