@@ -33,51 +33,55 @@ export interface PaginatedStories {
  * Utilizing our generic robust `apiClient`
  */
 export const StoryService = {
-  /**
-   * Fetch paginated stories, optionally filtered by category
-   */
-  async getStories(category?: string, page = 1, limit = 20): Promise<PaginatedStories> {
+  async getStories(
+    category?: string,
+    page = 1,
+    limit = 20
+  ): Promise<PaginatedStories> {
     try {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
       });
-      
+
       if (category) {
-        queryParams.append("category", category);
+        queryParams.append("category", category.toLowerCase().trim());
       }
 
-      const response = await apiClient.get<PaginatedStories>(`/api/stories?${queryParams.toString()}`, {
-        next: {
-          revalidate: 300, // 5 minutes cache
-          tags: category ? [`stories-category-${category}`] : ["stories-all"],
-        },
-      });
+      const response = await apiClient.get<PaginatedStories>(
+        `/api/stories?${queryParams.toString()}`,
+        {
+          cache: "no-store", // 🔥 FIX
+        }
+      );
 
       return response;
     } catch (error) {
-      if (error instanceof ApiError) {
-        console.error(`Story Fetch Error: [${error.status}]`, error.message);
-      }
-      // Return empty fallback
-      return { stories: [], pagination: { total: 0, page, limit, totalPages: 0 } };
+      console.error("Story Fetch Error:", error);
+
+      return {
+        stories: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
+      };
     }
   },
 
-  /**
-   * Fetch a single story fully mapped by slug
-   */
   async getStoryBySlug(slug: string): Promise<Story | null> {
     try {
-      const story = await apiClient.get<Story>(`/api/stories/${slug}`, {
-        next: {
-          revalidate: 300,
-          tags: [`story-${slug}`],
-        },
-      });
+      const story = await apiClient.get<Story>(
+        `/api/stories/${slug}`,
+        {
+          cache: "no-store", // 🔥 FIX
+        }
+      );
       return story;
     } catch (error) {
       return null;
     }
-  }
+  },
 };

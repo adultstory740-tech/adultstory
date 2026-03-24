@@ -1,20 +1,29 @@
+
+export const dynamic = "force-dynamic"; // 🔥 VERY IMPORTANT
+
+
 import StoryGrid from "../../../../components/StoryGrid";
 import Sidebar from "../../../../components/Sidebar";
 import { getCategories } from "../../../../lib/api/categories";
 import { StoryService } from "../../../../lib/api/stories";
 
-export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CategoryPage({
+    params,
+}: {
+    params: { slug: string }; // ✅ FIXED
+}) {
     const { slug } = await params;
-    
+
     const categories = await getCategories();
-    
+
     // Find the matching category object
     const categoryInfo = categories.find(c => c.slug === slug);
     const categoryName = categoryInfo ? (categoryInfo.uiLabel || categoryInfo.name) : decodeURIComponent(slug);
-    
+
     // Fetch stories from our optimized dynamic API
     const paginatedData = await StoryService.getStories(slug, 1, 20);
-    const categoryStories = paginatedData.stories;
+
+    const categoryStories = paginatedData?.stories || [];
 
     const pageTitle = `श्रेणी: ${categoryName}`;
 
