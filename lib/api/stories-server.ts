@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import connectToDatabase from "../mongodb";
 import Content from "../../models/Content";
 import Category from "../../models/Category";
@@ -61,5 +62,32 @@ export async function getStoriesDirect(
       stories: [],
       pagination: { total: 0, page, limit, totalPages: 0 },
     };
+  }
+}
+
+/**
+ * Fetch a single story directly from MongoDB by slug (or _id).
+ */
+export async function getStoryBySlugDirect(slug: string): Promise<Story | null> {
+  try {
+    await connectToDatabase();
+
+    const story = await Content.findOne({ 
+      $or: [{ slug: slug }, { _id: mongoose.isValidObjectId(slug) ? slug : undefined }],
+      published: true 
+    })
+    .populate('categoryId', 'name slug uiLabel')
+    .lean();
+
+    if (!story) return null;
+
+    return {
+      ...story,
+      _id: story._id.toString(),
+      createdAt: story.createdAt?.toISOString() || new Date().toISOString(),
+    } as unknown as Story;
+  } catch (error) {
+    console.error("Direct Single Story Fetch Error:", error);
+    return null;
   }
 }

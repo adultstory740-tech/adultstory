@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import Content from "@/models/Content";
+import { getStoryBySlugDirect } from "@/lib/api/stories-server";
 
 export async function GET(
   request: Request,
@@ -8,18 +9,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    await connectToDatabase();
-
-    // We can query by either _id or slug since both are unique enough
-    // But typically the URL param is the slug, so we query by it first, falling back to ID if it's a valid ObjectId
-    let matchQuery: any = { slug };
-
-    if (slug.match(/^[0-9a-fA-F]{24}$/)) {
-        // It's a valid ObjectId
-        matchQuery = { $or: [{ _id: slug }, { slug }] };
-    }
-
-    const story = await Content.findOne(matchQuery).lean();
+    const story = await getStoryBySlugDirect(slug);
 
     if (!story) {
       return NextResponse.json(
@@ -29,7 +19,7 @@ export async function GET(
     }
 
     // Increment view count asynchronously (fire and forget)
-    // In a high traffic scenario this should be rate limited or done via redis
+    // We import Content here or pass it to the service if needed, but for now we can just use the model directly as it's an API route.
     Content.updateOne({ _id: story._id }, { $inc: { views: 1 } }).exec().catch(e => console.error("View increment error", e));
 
     return NextResponse.json(story, {

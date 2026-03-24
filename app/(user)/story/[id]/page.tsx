@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Sidebar from "../../../../components/Sidebar";
-import { StoryService } from "../../../../lib/api/stories";
+import { getStoryBySlugDirect } from "../../../../lib/api/stories-server";
 import React from "react";
 import { Metadata } from "next";
 
@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { id } = await params;
 
     // Fetch story dynamically using the cache
-    const story = await StoryService.getStoryBySlug(id);
+    const story = await getStoryBySlugDirect(id);
 
     if (!story) {
         return {
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     const title = `${story.title} | FreeSexKahani`;
     const description = story.excerpt || "इस बेहतरीन कहानी को अभी पढ़ें और आनंद लें।";
-    const keywords = story.tags ? story.tags.map(t => t.replace(/-/g, ' ')).join(", ") : "कहानी, story, reading";
+    const keywords = story.tags ? story.tags.map((t: string) => t.replace(/-/g, ' ')).join(", ") : "कहानी, story, reading";
 
     return {
         title,
@@ -49,7 +49,7 @@ export default async function StoryPage({ params }: { params: Promise<{ id: stri
     const { id } = await params; // id here is actually the slug
 
     // Fetch story dynamically
-    const story = await StoryService.getStoryBySlug(id);
+    const story = await getStoryBySlugDirect(id);
 
     if (!story) {
         notFound();
@@ -71,7 +71,7 @@ export default async function StoryPage({ params }: { params: Promise<{ id: stri
                         <div className="mb-6">
                             {/* We can show tags or categories here instead of the raw category name */}
                             <div className="flex flex-wrap gap-2 mb-4">
-                                {story.tags.slice(0, 2).map((tag, i) => (
+                                {story.tags.slice(0, 2).map((tag: string, i: number) => (
                                     <span key={i} className="inline-block text-sm font-semibold bg-primary/10 text-primary px-3 py-1 rounded-full">
                                         {tag.replace(/-/g, ' ')}
                                     </span>
@@ -119,7 +119,7 @@ export default async function StoryPage({ params }: { params: Promise<{ id: stri
 
                         <div className="mt-10 pt-6 border-t border-border flex flex-wrap gap-2 items-center">
                             <span className="text-sm font-bold text-foreground/70 flex items-center">टैग्स:</span>
-                            {story.tags.map((tag, index) => (
+                            {story.tags.map((tag: string, index: number) => (
                                 <span
                                     key={index}
                                     className="text-xs bg-secondary/80 border border-border/50 px-3 py-1.5 rounded-full text-secondary-foreground font-medium"
