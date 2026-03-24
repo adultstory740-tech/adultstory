@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import Content from "@/models/Content";
 import Category from "@/models/Category";
+import { getStoriesDirect } from "@/lib/api/stories-server";
 
 export async function POST(request: Request) {
   try {
@@ -77,38 +78,15 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    await connectToDatabase();
-
     const { searchParams } = new URL(request.url);
     const categorySlug = searchParams.get("category");
     const limit = parseInt(searchParams.get("limit") || "20", 10);
     const page = parseInt(searchParams.get("page") || "1", 10);
 
-    const matchQuery: any = { published: true };
-
-    if (categorySlug) {
-      // Find stories that have this category slug in their tags
-      matchQuery.tags = categorySlug;
-    }
-
-    const total = await Content.countDocuments(matchQuery);
-    const stories = await Content.find(matchQuery)
-      .select("title slug excerpt coverImage coverImageAlt tags views likes createdAt isAdult")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+    const paginatedData = await getStoriesDirect(categorySlug || undefined, page, limit);
 
     return NextResponse.json(
-      {
-        stories,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
+      paginatedData,
       {
         status: 200,
         headers: {

@@ -5,13 +5,9 @@ export const dynamic = "force-dynamic"; // 🔥 VERY IMPORTANT
 import StoryGrid from "../../../../components/StoryGrid";
 import Sidebar from "../../../../components/Sidebar";
 import { getCategories } from "../../../../lib/api/categories";
-import { StoryService } from "../../../../lib/api/stories";
+import { getStoriesDirect } from "../../../../lib/api/stories-server";
 
-export default async function CategoryPage({
-    params,
-}: {
-    params: { slug: string }; // ✅ FIXED
-}) {
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
     const categories = await getCategories();
@@ -20,10 +16,9 @@ export default async function CategoryPage({
     const categoryInfo = categories.find(c => c.slug === slug);
     const categoryName = categoryInfo ? (categoryInfo.uiLabel || categoryInfo.name) : decodeURIComponent(slug);
 
-    // Fetch stories from our optimized dynamic API
-    const paginatedData = await StoryService.getStories(slug, 1, 20);
-
-    const categoryStories = paginatedData?.stories || [];
+    // Fetch stories directly from database using the new server-only service
+    const paginatedData = await getStoriesDirect(slug, 1, 20);
+    const categoryStories = paginatedData.stories || [];
 
     const pageTitle = `श्रेणी: ${categoryName}`;
 

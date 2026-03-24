@@ -1,14 +1,14 @@
 import React from "react";
 import { SidebarStoryList, SidebarCategories } from "./SidebarWidgets";
 import { getCategories } from "../lib/api/categories";
-import { StoryService } from "../lib/api/stories";
+import { getStoriesDirect } from "../lib/api/stories-server";
 
 export default async function Sidebar() {
     // Fetch categories dynamically using our reusable generic service with Next.js Cache
     const categories = await getCategories();
 
-    // Fetch recent stories from the database to replace getLatestStories
-    const recentData = await StoryService.getStories(undefined, 1, 4);
+    // Fetch recent stories directly from database
+    const recentData = await getStoriesDirect(undefined, 1, 4);
     const recent = recentData.stories.map(s => ({
         id: s._id.toString(),
         title: s.title,
@@ -16,8 +16,8 @@ export default async function Sidebar() {
         url: `/story/${s.slug || s._id}`
     }));
 
-    // Fetch trending stories from the database (just simulating by taking a different page for now)
-    const trendingData = await StoryService.getStories(undefined, 2, 3);
+    // Fetch trending stories directly from database
+    const trendingData = await getStoriesDirect(undefined, 2, 3);
     const moreLikeThis = trendingData.stories.length > 0
         ? trendingData.stories.map(s => ({
             id: s._id.toString(),

@@ -1,10 +1,10 @@
 import StoryGrid from "../../components/StoryGrid";
 import Sidebar from "../../components/Sidebar";
-import { StoryService } from "../../lib/api/stories";
+import { getStoriesDirect } from "../../lib/api/stories-server";
 
 export default async function Home() {
-  // Fetch up to 20 latest stories globally (no category filter)
-  const paginatedData = await StoryService.getStories(undefined, 1, 20);
+  // Fetch up to 20 latest stories globally directly from DB
+  const paginatedData = await getStoriesDirect(undefined, 1, 20);
   const latestStories = paginatedData.stories;
 
   return (
