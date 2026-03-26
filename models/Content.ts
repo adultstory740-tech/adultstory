@@ -1,4 +1,5 @@
 import mongoose, { Schema, model, models, Types } from "mongoose";
+import { transliterateHindiToLatin } from "../lib/utils";
 
 /**
  * =========================
@@ -134,9 +135,9 @@ const ContentSchema = new Schema(
  */
 ContentSchema.pre("save", async function (this: any) {
   if (!this.slug && this.title) {
-    this.slug = this.title
+    this.slug = transliterateHindiToLatin(this.title)
       .toLowerCase()
-      .replace(/[^a-z0-9\u0900-\u097F]+/g, "-")
+      .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   }
 });

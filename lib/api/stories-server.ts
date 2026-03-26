@@ -5,8 +5,7 @@ import Category from "../../models/Category";
 import { Story, PaginatedStories } from "./stories";
 
 /**
- * Server-only service to fetch stories directly from MongoDB.
- * Avoids network overhead and "Dynamic server usage" errors on Vercel.
+ * Fetch paginated stories directly from MongoDB
  */
 export async function getStoriesDirect(
   categorySlug?: string,
@@ -18,16 +17,20 @@ export async function getStoriesDirect(
 
     const matchQuery: any = { published: true };
 
+    // ✅ CATEGORY FILTER
     if (categorySlug) {
-      // 1. First attempt: Find category by slug to get its ID
-      const category = await Category.findOne({ slug: categorySlug }).lean();
+      const normalizedSlug = categorySlug.toLowerCase().trim();
+
+      const category = await Category.findOne({
+        slug: normalizedSlug,
+      }).lean();
 
       if (category) {
-        // Filter by categoryId (the most reliable way)
+        // 🔥 best filter (by ObjectId)
         matchQuery.categoryId = category._id;
       } else {
-        // 2. Fallback: Filter by tags (in case stories are only tagged with the slug)
-        matchQuery.tags = categorySlug;
+        // 🔥 fallback (tag match)
+        matchQuery.tags = { $in: [normalizedSlug] };
       }
     }
 
@@ -35,11 +38,14 @@ export async function getStoriesDirect(
 
     const [stories, total] = await Promise.all([
       Content.find(matchQuery)
-        .select("title slug excerpt coverImage coverImageAlt tags views likes createdAt isAdult")
+        .select(
+          "title slug excerpt coverImage coverImageAlt tags views likes createdAt isAdult"
+        )
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
+
       Content.countDocuments(matchQuery),
     ]);
 
@@ -47,7 +53,8 @@ export async function getStoriesDirect(
       stories: stories.map((s: any) => ({
         ...s,
         _id: s._id.toString(),
-        createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
+        createdAt:
+          s.createdAt?.toISOString() || new Date().toISOString(),
       })),
       pagination: {
         total,
@@ -58,34 +65,60 @@ export async function getStoriesDirect(
     };
   } catch (error) {
     console.error("Direct Story Fetch Error:", error);
+
     return {
       stories: [],
-      pagination: { total: 0, page, limit, totalPages: 0 },
+      pagination: {
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      },
     };
   }
 }
 
 /**
- * Fetch a single story directly from MongoDB by slug (or _id).
+ * Fetch single story by slug or _id
  */
-export async function getStoryBySlugDirect(slug: string): Promise<Story | null> {
+export async function getStoryBySlugDirect(
+  slug: string
+): Promise<Story | null> {
   try {
     await connectToDatabase();
 
-    const story = await Content.findOne({ 
-      $or: [{ slug: slug }, { _id: mongoose.isValidObjectId(slug) ? slug : undefined }],
-      published: true 
-    })
-    .populate('categoryId', 'name slug uiLabel')
-    .lean();
+    // ✅ Normalize slug
+    const normalizedSlug = slug.toLowerCase().trim();
+    const decodedSlug = decodeURIComponent(normalizedSlug);
+
+    // ✅ Build safe query
+    const query: any = {
+      $or: [
+        { slug: normalizedSlug },
+        { slug: decodedSlug },
+        { slug: encodeURIComponent(normalizedSlug) }, // 🔥 ADD THIS
+
+      ],
+      published: true,
+    };
+
+    // ✅ Only add _id if valid
+    if (mongoose.isValidObjectId(slug)) {
+      query.$or.push({ _id: slug });
+    }
+
+    const story = await Content.findOne(query)
+      .populate("categoryId", "name slug uiLabel")
+      .lean();
 
     if (!story) return null;
 
     return {
       ...story,
       _id: story._id.toString(),
-      createdAt: story.createdAt?.toISOString() || new Date().toISOString(),
-    } as unknown as Story;
+      createdAt:
+        story.createdAt?.toISOString() || new Date().toISOString(),
+    } as Story;
   } catch (error) {
     console.error("Direct Single Story Fetch Error:", error);
     return null;

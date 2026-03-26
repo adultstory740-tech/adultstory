@@ -7,6 +7,8 @@ interface StoryCardProps {
 }
 
 export default function StoryCard({ story }: StoryCardProps) {
+
+    console.log(story)
     // Format date nicely
     const dateStr = new Date(story.createdAt).toLocaleDateString("hi-IN", {
         year: "numeric",
@@ -17,7 +19,7 @@ export default function StoryCard({ story }: StoryCardProps) {
     return (
         <div className="group bg-card backdrop-blur rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-5 flex flex-col justify-between border border-border">
             <div>
-                <Link href={`/story/${story.slug || story._id}`} className="block">
+                <Link href={`/${story._id || story.slug}`} className="block">
                     <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors text-foreground line-clamp-2">
                         {story.title}
                     </h3>
@@ -49,7 +51,7 @@ export default function StoryCard({ story }: StoryCardProps) {
                     </span>
                 </div>
             </div>
-            <Link href={`/story/${story.slug || story._id}`} className="mt-6 block w-full text-center text-base font-semibold bg-primary text-primary-foreground py-2.5 rounded-xl hover:scale-[1.02] active:scale-95 transition shadow-sm hover:shadow">
+            <Link href={`/${story.slug}`} className="mt-6 block w-full text-center text-base font-semibold bg-primary text-primary-foreground py-2.5 rounded-xl hover:scale-[1.02] active:scale-95 transition shadow-sm hover:shadow">
                 पढ़ें →
             </Link>
         </div>

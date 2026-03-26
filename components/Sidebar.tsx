@@ -13,7 +13,7 @@ export default async function Sidebar() {
         id: s._id.toString(),
         title: s.title,
         subtitle: new Date(s.createdAt).toLocaleDateString("hi-IN"),
-        url: `/story/${s.slug || s._id}`
+        url: `/${s.slug}`
     }));
 
     // Fetch trending stories directly from database
@@ -23,13 +23,13 @@ export default async function Sidebar() {
             id: s._id.toString(),
             title: s.title,
             subtitle: "🔥 ट्रेंडिंग",
-            url: `/story/${s.slug || s._id}`
+            url: `/${s.slug}`
           }))
         : recentData.stories.slice(0, 3).map(s => ({
             id: s._id.toString(),
             title: s.title,
             subtitle: "🔥 ट्रेंडिंग",
-            url: `/story/${s.slug || s._id}`
+            url: `/${s.slug}`
           }));
 
     const popularCategories = [
