@@ -9,7 +9,17 @@ export async function POST(request: Request) {
     await connectToDatabase();
 
     const body = await request.json();
-    const { title, excerpt, content, categories, isAdult, published } = body;
+    const {
+      title,
+      excerpt,
+      content,
+      categories,
+      isAdult,
+      published,
+      slug,
+      meta,
+      tags: tagsFromBody,
+    } = body;
 
     // Validate inputs
     if (!title || !content || !categories || !categories.length) {
@@ -46,15 +56,29 @@ export async function POST(request: Request) {
     });
 
     // Create the Content (Story)
+    const tagList =
+      Array.isArray(tagsFromBody) && tagsFromBody.length > 0
+        ? tagsFromBody.map(String)
+        : categories;
+
     const newStory = new Content({
       title,
+      slug: typeof slug === "string" && slug.trim() ? slug.trim().toLowerCase() : undefined,
       excerpt: excerpt || content.substring(0, 150) + "...",
       categoryId: primaryCategoryId,
-      tags: categories, // Using categories as tags as per frontend logic
+      tags: tagList,
       contentBlocks,
       type: "story",
       published: published !== undefined ? published : true,
       isAdult: isAdult !== undefined ? isAdult : true,
+      meta:
+        meta && typeof meta === "object"
+          ? {
+              title: meta.title,
+              description: meta.description,
+              keywords: Array.isArray(meta.keywords) ? meta.keywords : undefined,
+            }
+          : undefined,
     });
 
     await newStory.save();
